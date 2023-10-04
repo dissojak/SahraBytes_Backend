@@ -6,6 +6,7 @@ const HttpError = require("./models/http-error");
 
 // const admin = require("./routes/admin");
 const user = require("./routes/user");
+const team = require("./routes/team");
 // const hackaton = require("./routes/hackaton");
 
 const app = express();
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 
 // app.use("/api/admin", admin);
 app.use("/api/user", user);
+app.use("/api/user", team);
 // app.use("/api/hackaton", hackaton);
 
 app.use((req, res, next) => {
