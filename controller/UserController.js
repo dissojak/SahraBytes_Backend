@@ -57,26 +57,31 @@ exports.changePassword = async (req, res, next) => {
     console.log(errors);
     return next(new HttpError("Invalid Inputs , check your data ", 422));
   }
-  const { pw , } = req.body;
+  const { newPw, oldPw } = req.body;
   const userId = req.params.uid;
-  let newUser;
+  let user;
   try {
-    newUser = await User.findById(userId);
+    user = await User.findById(userId);
   } catch (e) {
     return next(new HttpError(" Somthing Went Wrong ! ", 500));
   }
-  // if (newUser.pw!==oldPw) {
-  //   return next(new HttpError(" the old password is wrong ! ", 500));
-  // }
-  newUser.pw = pw;
+  if (user.pw !== oldPw) {
+    return next(
+      new HttpError(
+        " the old password is not matching with provided one check the old password again ! ",
+        500
+      )
+    );
+  }
+  user.pw = newPw;
 
   try {
-    await newUser.save();
+    await user.save();
   } catch (e) {
     return next(new HttpError(" Updating place failed ! ", 500));
   }
 
-  res.status(200).json({ newUser: newUser.toObject({ getters: true }) });
+  res.status(200).json({ user: user.toObject({ getters: true }) });
 };
 
 exports.changeUsername = async (req, res, next) => {
@@ -87,21 +92,21 @@ exports.changeUsername = async (req, res, next) => {
   }
   const { username } = req.body;
   const userId = req.params.uid;
-  let newUser;
+  let user;
   try {
-    newUser = await User.findById(userId);
+    user = await User.findById(userId);
   } catch (e) {
     return next(new HttpError(" Somthing Went Wrong ! ", 500));
   }
-  newUser.username = username.toLowerCase();
+  user.username = username.toLowerCase();
 
   try {
-    await newUser.save();
+    await user.save();
   } catch (e) {
     return next(new HttpError(" Updating place failed ! ", 500));
   }
 
-  res.status(200).json({ newUser: newUser.toObject({ getters: true }) });
+  res.status(200).json({ user: user.toObject({ getters: true }) });
 };
 
 exports.changeEmail = async (req, res, next) => {
@@ -112,20 +117,27 @@ exports.changeEmail = async (req, res, next) => {
   }
   const { email } = req.body;
   const userId = req.params.uid;
-  let newUser;
+  let user;
   try {
-    newUser = await User.findById(userId);
+    user = await User.findById(userId);
   } catch (e) {
     return next(new HttpError(" Somthing Went Wrong ! ", 500));
   }
-  newUser.email = email;
+  user.email = email;
 
   try {
-    await newUser.save();
+    await user.save();
   } catch (e) {
     return next(new HttpError(" Updating place failed ! ", 500));
   }
 
-  res.status(200).json({ newUser: newUser.toObject({ getters: true }) });
+  res.status(200).json({ user: user.toObject({ getters: true }) });
 };
 
+// exports.getUsers = async (req, res, next) => {
+//   const users = await User.find({}, "name age");
+//   // const USERS= await User.find({}, '-pw'); everything except pw
+//   res.status(200).json({
+//     users: users.map((user) => user.toObject({ getters: true })),
+//   });
+// };

@@ -15,8 +15,8 @@ router.post(
 );
 router.post("/login", UC.loginUser);
 router.post(
-  "/settings/pw/:uid",
-  [check("pw").isLength({ min: 3 })],
+  "/settings/password/:uid",
+  [check("newPw").isLength({ min: 3 }),check("oldPw").isLength({ min:3})],
   UC.changePassword
 );
 router.post(
@@ -29,5 +29,7 @@ router.post(
   [check("email").normalizeEmail().isEmail()],
   UC.changeEmail
 );
+
+// router.get("/getUsers",UC.getUsers);
 
 module.exports = router;
