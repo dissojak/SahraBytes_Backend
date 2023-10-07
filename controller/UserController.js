@@ -15,7 +15,7 @@ exports.signupUser = async (req, res, next) => {
     pw,
     age,
     role: role || "member",
-    joined_team: -1,
+    joined_team: "-1",
     banned: false,
   });
   try {

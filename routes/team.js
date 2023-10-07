@@ -8,9 +8,23 @@ router.post(
   [
     check("name").not().isEmpty(),
     check("description").isLength({ min: 200, max: 300 }),
-    check("captain").isNumeric().not().isEmpty(),
+    check("creator").not().isEmpty(),
   ],
   TC.createTeam
+);
+router.post(
+  "/addMemberToTeam/:tid",
+  [check("email").normalizeEmail().isEmail(),],
+  TC.addMember
+);
+router.delete(
+  "/deleteUserFromTeam/:tid/:uid",
+  // [check("id").not().isEmpty(),],
+  TC.deleteMember
+);
+router.delete(
+  "/memberDeleteTeam/:tid/",
+  TC.deleteTeam
 );
 
 module.exports = router;

@@ -1,46 +1,206 @@
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
+const mongoose = require("mongoose");
 const Team = require("../models/team");
 const User = require("../models/user");
 
 exports.createTeam = async (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      console.log(errors);
-      return next(new HttpError("Invalid Inputs , check your data ", 422));
-    }
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(new HttpError("Invalid Inputs , check your data ", 422));
+  }
+  const { name, description, creator } = req.body;
+  let user;
+  try {
+    user = await User.findById(creator);
+  } catch (e) {
+    return next(new HttpError(" Creating team failed ! ", 500));
+  }
 
-    let user;
+  if (user.joined_team !== "-1") {
+    return next(new HttpError(" this user already have a team", 500));
+  }
+
+  if (!user) {
+    return next(
+      new HttpError(" we could not find user for provided id ! ", 404)
+    );
+  }
+
+  const createdTeam = new Team({
+    name,
+    description,
+    captain: creator,
+    members: [creator],
+    joined_hackathon: [],
+  });
+
+  try {
+    const SESSION = await mongoose.startSession();
+    SESSION.startTransaction();
+    await createdTeam.save({ SESSION });
+    user.role = "captain";
+    user.joined_team = createdTeam._id.toString();
+    await user.save({ SESSION });
+    await SESSION.commitTransaction();
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError(" Creating team failed !!! ", 500));
+  }
+  res.status(201).json({ team: createdTeam });
+};
+
+exports.addMember = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(new HttpError("Invalid Inputs , check your data ", 422));
+  }
+  const { email } = req.body;
+  const teamId = req.params.tid;
+  let user;
+  try {
+    user = await User.findOne({ email });
+  } catch (e) {
+    return next(new HttpError(" adding member failed ! ", 500));
+  }
+  if (user.joined_team !== "-1") {
+    return next(new HttpError(" this user already has a team", 500));
+  }
+
+  if (!user) {
+    return next(
+      new HttpError(" we could not find user for provided id ! ", 404)
+    );
+  }
+  let team;
+  try {
+    team = await Team.findById(teamId);
+  } catch (e) {
+    return next(new HttpError(" adding member ! ", 500));
+  }
+  if (!team) {
+    return next(new HttpError(" we could not find this team ! ", 404));
+  }
+
+  try {
+    const SESSION = await mongoose.startSession();
+    SESSION.startTransaction();
+    team.members.push(user);
+    await team.save({ SESSION });
+    user.joined_team = team._id.toString();
+    await user.save({ SESSION });
+    await SESSION.commitTransaction();
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError(" adding the member to team failed !!! ", 500));
+  }
+  res.status(201).json({ team: team.toObject({ getters: true }) });
+};
+
+exports.deleteMember = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(new HttpError("Invalid Inputs , check your data ", 422));
+  }
+  // const { id } = req.body;
+  const teamId = req.params.tid;
+  const userId = req.params.uid;
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (e) {
+    return next(new HttpError(" adding member failed ! ", 500));
+  }
+  if (!user) {
+    return next(
+      new HttpError(" we could not find user for provided id ! ", 404)
+    );
+  }
+
+  let team;
+  try {
+    team = await Team.findById(teamId);
+  } catch (e) {
+    return next(new HttpError(" adding member ! ", 500));
+  }
+  if (!team) {
+    return next(new HttpError(" we could not find this team ! ", 404));
+  }
+
+  try {
+    const SESSION = await mongoose.startSession();
+    SESSION.startTransaction();
+    team.members.pull(user);
+    await team.save({ SESSION });
+    user.joined_team = "-1";
+    await user.save({ SESSION });
+    await SESSION.commitTransaction();
+  } catch (e) {
+    console.error(e);
+    return next(
+      new HttpError(" deleting the member from the team failed !!! ", 500)
+    );
+  }
+  res.status(200).json({ message: "Member deleted successfully" });
+};
+exports.deleteTeam = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(new HttpError("Invalid Inputs , check your data ", 422));
+  }
+  const teamId = req.params.tid;
+  let team;
+  try {
+    team = await Team.findById(teamId);
+  } catch (e) {
+    return next(new HttpError(" adding member ! ", 500));
+  }
+  if (!team) {
+    return next(new HttpError(" we could not find this team ! ", 404));
+  }
+
+  try {
+    const SESSION = await mongoose.startSession();
+    SESSION.startTransaction();
+    let captain;
     try {
-        user = await User.findById(creator);
+      captain =await User.findById(team.members[0]);
+    } catch (e) {
+      return next(new HttpError(" adding member failed ! ", 500));
+    }
+    if (!captain) {
+      return next(
+        new HttpError(" we could not find user for provided id ! ", 404)
+      );
+    }
+    captain.role = "member";
+    await captain.save({ SESSION });
+    team.members.forEach( async (userId) => {
+      let user;
+      try {
+        user =await User.findById(userId);
       } catch (e) {
-        return next(new HttpError(" Creating place failed ! ", 500));
+        return next(new HttpError(" adding member failed ! ", 500));
       }
-    
       if (!user) {
         return next(
           new HttpError(" we could not find user for provided id ! ", 404)
         );
       }
-  
-    const { name, description, creator } = req.body;
-    const createdTeam = new Team({
-      name,
-      description,
-      captain:creator,
-      members:[creator,],
-      joined_hackathon:[],
-    });
-  
-    try {
-      const SESSION = await mongoose.startSession();
-      SESSION.startTransaction();
-      await createdTeam.save({ SESSION });
-      user.joined_team.push(creator);
+      user.joined_team = "-1";
       await user.save({ SESSION });
-      await SESSION.commitTransaction();
-    } catch (e) {
-      return next(new HttpError(" Creating place failed ! ", 500));
-    }
-    res.status(201).json({ team: createdTeam });
-  };
+    });
+    await team.deleteOne({ SESSION });
+    await SESSION.commitTransaction();
+  } catch (e) {
+    console.error(e);
+    return next(
+      new HttpError(" deleting the member from the team failed !!! ", 500)
+    );
+  }
+  res.status(200).json({ message: "Team deleted successfully" });
+};
