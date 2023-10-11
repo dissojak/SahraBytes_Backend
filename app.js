@@ -29,6 +29,7 @@ app.use((req, res, next) => {
 // app.use("/api/admin", admin);
 app.use("/api/user", user);
 app.use("/api/user", team);
+app.use("/api/admin", team);
 // app.use("/api/hackaton", hackaton);
 
 app.use((req, res, next) => {

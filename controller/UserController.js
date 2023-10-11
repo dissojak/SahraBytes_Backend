@@ -134,10 +134,21 @@ exports.changeEmail = async (req, res, next) => {
   res.status(200).json({ user: user.toObject({ getters: true }) });
 };
 
-// exports.getUsers = async (req, res, next) => {
-//   const users = await User.find({}, "name age");
-//   // const USERS= await User.find({}, '-pw'); everything except pw
-//   res.status(200).json({
-//     users: users.map((user) => user.toObject({ getters: true })),
-//   });
-// };
+exports.getUsersByTeamId = async (req, res, next) => {
+  const TeamId = req.params.tid;
+  let USERS;
+  try {
+    USERS = await User.find({ joined_team: TeamId }, "username role");
+  } catch (err) {
+    return next(new HttpError(" Somthing Went Wrong HERE ! ", 500));
+  }
+  if (!USERS || USERS.length === 0) {
+    next(new HttpError("couldn't find User for the provided Team id", 404));
+  } else {
+    res.json({
+      USERS: USERS.map((user) => user.toObject({ getters: true })),
+    });
+  }
+};
+
+

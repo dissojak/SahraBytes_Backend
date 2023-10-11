@@ -23,8 +23,9 @@ router.delete(
   TC.deleteMember
 );
 router.delete(
-  "/memberDeleteTeam/:tid/",
+  "/memberDeleteTeam/:tid",
   TC.deleteTeam
 );
+router.get("/getTeams",TC.getTeams);
 
 module.exports = router;

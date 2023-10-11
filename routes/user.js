@@ -29,7 +29,6 @@ router.post(
   [check("email").normalizeEmail().isEmail()],
   UC.changeEmail
 );
-
-// router.get("/getUsers",UC.getUsers);
+router.get("/getUsersByTeamId/:tid",UC.getUsersByTeamId);
 
 module.exports = router;

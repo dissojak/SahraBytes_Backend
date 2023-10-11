@@ -168,7 +168,7 @@ exports.deleteTeam = async (req, res, next) => {
     SESSION.startTransaction();
     let captain;
     try {
-      captain =await User.findById(team.members[0]);
+      captain = await User.findById(team.members[0]);
     } catch (e) {
       return next(new HttpError(" adding member failed ! ", 500));
     }
@@ -179,10 +179,10 @@ exports.deleteTeam = async (req, res, next) => {
     }
     captain.role = "member";
     await captain.save({ SESSION });
-    team.members.forEach( async (userId) => {
+    team.members.forEach(async (userId) => {
       let user;
       try {
-        user =await User.findById(userId);
+        user = await User.findById(userId);
       } catch (e) {
         return next(new HttpError(" adding member failed ! ", 500));
       }
@@ -204,3 +204,12 @@ exports.deleteTeam = async (req, res, next) => {
   }
   res.status(200).json({ message: "Team deleted successfully" });
 };
+
+exports.getTeams = async (req, res, next) => {
+  const teams = await Team.find({}, "name members");
+  // still need to use * members.length * to give the length of members
+  res.status(200).json({
+    teams: teams.map(team => team.toObject({ getters: true }))
+  });
+};
+
