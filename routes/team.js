@@ -14,7 +14,7 @@ router.post(
 );
 router.post(
   "/addMemberToTeam/:tid",
-  [check("email").normalizeEmail().isEmail(),],
+  [check("email").normalizeEmail().isEmail()],
   TC.addMember
 );
 router.delete(
@@ -22,10 +22,17 @@ router.delete(
   // [check("id").not().isEmpty(),],
   TC.deleteMember
 );
-router.delete(
-  "/memberDeleteTeam/:tid",
-  TC.deleteTeam
+router.delete("/memberDeleteTeam/:tid", TC.deleteTeam);
+
+router.get("/getTeams", TC.getTeams);
+
+router.patch(
+  "/team/settings/:tid",
+  [
+    check("name").not().isEmpty(),
+    check("description").isLength({ min: 200, max: 300 }),
+  ],
+  TC.editTeam
 );
-router.get("/getTeams",TC.getTeams);
 
 module.exports = router;

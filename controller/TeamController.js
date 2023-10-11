@@ -213,3 +213,33 @@ exports.getTeams = async (req, res, next) => {
   });
 };
 
+exports.editTeam= async (req, res , next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    return next(new HttpError("Invalid Inputs , check your data ", 422));
+  }
+  const { name , description } = req.body;
+  const teamId = req.params.tid;
+  let team;
+  try {
+    team = await Team.findById(teamId);
+  } catch (e) {
+    return next(new HttpError(" updating team fail ! ", 500));
+  }
+  if (!team) {
+    return next(new HttpError(" we could not find this team ! ", 404));
+  }
+
+  team.name=name;
+  team.description=description;
+
+  try {
+    await team.save();
+  } catch (e) {
+    console.error(e);
+    return next(new HttpError(" updating team info failed !!! ", 500));
+  }
+  res.status(201).json({ team: team.toObject({ getters: true }) });
+};
+
