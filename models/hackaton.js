@@ -8,7 +8,7 @@ const hackatonSchema = new Schema({
   organisateur: { type: String, required: true },
   theme: { type: String, required: true },
   email: { type: String, required: true },
-  // logo: { type: *****, required: true },
+  photoUrl: { type: String },
   description: { type: String, required: true },
   StartingDate: { type: Date, required: true },
   EndingDate: { type: Date, required: true },
@@ -18,5 +18,5 @@ const hackatonSchema = new Schema({
   // document : { type: *****, required: true },
 });
 
-teamSchema.plugin(uniqueValidator);
+hackatonSchema.plugin(uniqueValidator);
 module.exports = mongoose.model("hackaton", hackatonSchema);

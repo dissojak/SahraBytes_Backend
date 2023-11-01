@@ -1,42 +1,45 @@
 const express = require("express");
-const HC = require("../controller/TeamController");
+const HC = require("../controller/HackatonController");
+const upload = require("../upload");
 const { check } = require("express-validator");
 const router = express.Router();
 
 // router.post(
-//   "/createTeam",
-//   [
-//     check("name").not().isEmpty(),
-//     check("description").isLength({ min: 200, max: 300 }),
-//     check("creator").not().isEmpty(),
-//   ],
-//   TC.createTeam
-// );
-// router.post(
-//   "/addMemberToTeam/:tid",
-//   [check("email").normalizeEmail().isEmail()],
-//   TC.addMember
-// );
-// router.delete(
-//   "/deleteUserFromTeam/:tid/:uid",
-//   // [check("id").not().isEmpty(),],
-//   TC.deleteMember
-// );
-// router.delete("/memberDeleteTeam/:tid", TC.deleteTeam);
+//     "/addHackaton",
+//     upload.single('photo'),
+//     [
+//       check("title").not().isEmpty(),
+//       check("organisateur").not().isEmpty(),
+//       check("theme").not().isEmpty(),
+//       check("email").isEmail(),
+//       check("description").isLength({ min: 200 }),
+//       check("StartingDate").isDate(),
+//       check("EndingDate").isDate(),
+//     ],
+//     HC.addHackaton
+//   );
 
+  router.post(
+    "/addHackaton",
+    [
+      check("title").not().isEmpty(),
+      check("organisateur").not().isEmpty(),
+      check("theme").not().isEmpty(),
+      check("email").isEmail(),
+      check("description").isLength({ min: 200 }),
+      check("StartingDate").isDate(),
+      check("EndingDate").isDate(),
+    ],
+    HC.addHackaton
+  );
 router.get("/getHackatons", HC.getHackatons);
 
-router.get("/getHackatonById", HC.getHackatonById);
+router.get("/getHackatonById/:hid", HC.getHackatonById);
 
+router.post("/inscritTeamToHackaton", HC.addParticipant);
 
+router.delete("/removeTeamIscriptionFromHackaton", HC.removeParticipant);
 
-// router.patch(
-//   "/team/settings/:tid",
-//   [
-//     check("name").not().isEmpty(),
-//     check("description").isLength({ min: 200, max: 300 }),
-//   ],
-//   TC.editTeam
-// );
+router.patch("/updateHackaton/:hid", HC.updateHackaton);
 
 module.exports = router;
