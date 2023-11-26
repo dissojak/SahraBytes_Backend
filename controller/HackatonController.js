@@ -1,10 +1,9 @@
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Hackaton = require("../models/hackaton");
 const Team = require("../models/team");
 const User = require("../models/user");
-
 
 // exports.addHackaton = async (req, res, next) => {
 //   console.log('this is' ,req.files);
@@ -57,7 +56,15 @@ exports.addHackaton = async (req, res, next) => {
     return next(new HttpError("Invalid Inputs , check your data ", 422));
   }
 
-  const { title, organisateur, theme, email, description, StartingDate, EndingDate } = req.body;
+  const {
+    title,
+    organisateur,
+    theme,
+    email,
+    description,
+    StartingDate,
+    EndingDate,
+  } = req.body;
 
   const newHackaton = new Hackaton({
     title,
@@ -99,7 +106,9 @@ exports.getHackatons = async (req, res, next) => {
   const hackatons = await Hackaton.find({}, "-documents -description");
   // still need to use * members.length * to give the length of members
   res.status(200).json({
-    hackatons: hackatons.map((hackaton) => hackaton.toObject({ getters: true })),
+    hackatons: hackatons.map((hackaton) =>
+      hackaton.toObject({ getters: true })
+    ),
   });
 };
 
@@ -153,12 +162,12 @@ exports.addParticipant = async (req, res, next) => {
     return next(new HttpError(" adding the member to team failed !!! ", 500));
   }
   res.status(201).json("inscription in hackaton is DONE successfully ! ");
-  // whatever !! 
+  // whatever !!
 };
 
 exports.removeParticipant = async (req, res, next) => {
   const { userId, hackatonId } = req.body;
-  
+
   let hackaton;
   try {
     hackaton = await Hackaton.findById(hackatonId);
@@ -167,7 +176,9 @@ exports.removeParticipant = async (req, res, next) => {
   }
 
   if (!hackaton) {
-    return next(new HttpError("Couldn't find hackaton for the provided id", 404));
+    return next(
+      new HttpError("Couldn't find hackaton for the provided id", 404)
+    );
   }
 
   let user;
@@ -212,7 +223,7 @@ exports.removeParticipant = async (req, res, next) => {
   res.status(200).json("Participant removed from hackaton successfully!");
 };
 
-exports.updateHackaton = async (req, res, next) => {
+exports.editHackaton = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors);
@@ -220,17 +231,29 @@ exports.updateHackaton = async (req, res, next) => {
   }
 
   const hackatonId = req.params.hid;
-  const { title, organisateur, theme, email, description, StartingDate, EndingDate } = req.body;
+  const {
+    title,
+    organisateur,
+    theme,
+    email,
+    description,
+    StartingDate,
+    EndingDate,
+  } = req.body;
 
   let hackaton;
   try {
     hackaton = await Hackaton.findById(hackatonId);
   } catch (e) {
-    return next(new HttpError("Something went wrong, could not update hackaton", 500));
+    return next(
+      new HttpError("Something went wrong, could not update hackaton", 500)
+    );
   }
 
   if (!hackaton) {
-    return next(new HttpError("Could not find hackaton for the provided id", 404));
+    return next(
+      new HttpError("Could not find hackaton for the provided id", 404)
+    );
   }
 
   hackaton.title = title;
@@ -249,3 +272,50 @@ exports.updateHackaton = async (req, res, next) => {
 
   res.status(200).json({ hackaton: hackaton.toObject({ getters: true }) });
 };
+
+exports.deleteHackaton = async (req, res, next) => {
+  const hackatonId = req.params.hid;
+
+  let hackaton;
+  try {
+    hackaton = await Hackaton.findById(hackatonId);
+  } catch (e) {
+    console.error("Error finding hackaton:", e);
+    return next(new HttpError("Something went wrong, could not delete hackaton", 500));
+  }
+
+  if (!hackaton) {
+    return next(new HttpError("Could not find hackaton for the provided id", 404));
+  }
+
+  let teams;
+  try {
+    teams = await Team.find({ joined_hackathon: hackatonId });
+  } catch (e) {
+    console.error("Error finding teams:", e);
+    return next(new HttpError("Something went wrong, could not find teams", 500));
+  }
+
+  try {
+    const SESSION = await mongoose.startSession();
+    SESSION.startTransaction();
+    
+    const teamUpdates = teams.map(async (team) => {
+      team.joined_hackathon.pull(hackatonId);
+      return team.save({ session: SESSION });
+    });
+
+    await Promise.all(teamUpdates);
+
+    await hackaton.deleteOne({ session: SESSION });
+
+    await SESSION.commitTransaction();
+
+    res.status(200).json({ message: "Hackaton deleted successfully" });
+
+  } catch (e) {
+    console.error("Error deleting hackaton:", e);
+    return next(new HttpError("Deleting hackaton failed", 500));
+  }
+};
+

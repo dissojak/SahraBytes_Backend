@@ -40,6 +40,8 @@ router.post("/inscritTeamToHackaton", HC.addParticipant);
 
 router.delete("/removeTeamIscriptionFromHackaton", HC.removeParticipant);
 
-router.patch("/updateHackaton/:hid", HC.updateHackaton);
+router.patch("/editHackaton/:hid", HC.editHackaton);
+
+router.delete("/deleteHackaton/:hid", HC.deleteHackaton);
 
 module.exports = router;

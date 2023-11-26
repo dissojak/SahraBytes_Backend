@@ -5,7 +5,6 @@ const cloudinary = require('cloudinary').v2;
 
 const HttpError = require("./models/http-error");
 
-// const admin = require("./routes/admin");
 const user = require("./routes/user");
 const team = require("./routes/team");
 const hackaton = require("./routes/hackaton");
@@ -28,7 +27,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.use("/api/admin", admin);
 app.use("/api/user", user);
 app.use("/api/user", team);
 app.use("/api/admin", team);

@@ -12,6 +12,7 @@ const userSchema = new Schema({
   role: { type: String, required: true},
   joined_team: { type: String, required: true},
   banned:{ type: Boolean, required: true},
+  isAdmin: { type: Boolean, required: true},
 });
 
 userSchema.plugin(uniqueValidator);

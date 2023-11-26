@@ -17,6 +17,7 @@ exports.signupUser = async (req, res, next) => {
     role: role || "member",
     joined_team: "-1",
     banned: false,
+    isAdmin: false,
   });
   try {
     await createdUser.save();
@@ -151,4 +152,15 @@ exports.getUsersByTeamId = async (req, res, next) => {
   }
 };
 
+
+
+//admin function
+exports.updateAllUsersToAdmin = async (req, res, next) => {
+  try {
+    await User.updateMany({}, { isAdmin: false });
+    res.json( 'all users updated to admin.' );
+  } catch (error) {
+    return next(new HttpError('Error updating users to admin', 500));
+  }
+};
 

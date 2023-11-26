@@ -35,4 +35,6 @@ router.patch(
   TC.editTeam
 );
 
+router.delete('/BanTeam/:tid',TC.banTeam);
+
 module.exports = router;

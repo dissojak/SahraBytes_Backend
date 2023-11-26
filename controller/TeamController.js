@@ -243,3 +243,25 @@ exports.editTeam= async (req, res , next) => {
   res.status(201).json({ team: team.toObject({ getters: true }) });
 };
 
+exports.banTeam = async (req, res, next) => {
+  const teamId = req.params.tid;
+
+  let team;
+  try {
+      team = await Team.findById(teamId);
+  } catch (e) {
+    return next(new HttpError("Something went wrong, could not ban user", 500));
+  }
+
+  if (!team) {
+    return next(new HttpError("Could not find user for the provided id", 404));
+  }
+
+  try {
+      await User.updateMany({joined_team:teamId}, { banned: true });
+  } catch (e) {
+    return next(new HttpError("Banning team failed", 500));
+  }
+
+  res.status(200).json({ message: "Team and its members banned successfully", banned: true });
+};

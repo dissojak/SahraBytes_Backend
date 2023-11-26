@@ -31,4 +31,8 @@ router.post(
 );
 router.get("/getUsersByTeamId/:tid",UC.getUsersByTeamId);
 
+
+//superAdmin route
+router.patch('/updateAllUsersToAdmin', UC.updateAllUsersToAdmin);
+
 module.exports = router;
