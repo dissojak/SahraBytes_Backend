@@ -7,7 +7,7 @@ router.post(
   "/createTeam",
   [
     check("name").not().isEmpty(),
-    check("description").isLength({ min: 200, max: 300 }),
+    check("description").isLength({ min: 200, max: 600 }),
     check("creator").not().isEmpty(),
   ],
   TC.createTeam
@@ -18,8 +18,8 @@ router.post(
   TC.addMember
 );
 router.delete(
-  "/deleteUserFromTeam/:tid/:uid",
-  // [check("id").not().isEmpty(),],
+  "/kickUserFromTeam/:tid/:uid",
+  [check("id_captain").not().isEmpty(),],
   TC.deleteMember
 );
 router.delete("/memberDeleteTeam/:tid", TC.deleteTeam);
@@ -30,7 +30,7 @@ router.patch(
   "/team/settings/:tid",
   [
     check("name").not().isEmpty(),
-    check("description").isLength({ min: 200, max: 300 }),
+    check("description").isLength({ min: 200, max: 600 }),
   ],
   TC.editTeam
 );

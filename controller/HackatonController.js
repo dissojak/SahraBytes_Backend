@@ -142,10 +142,21 @@ exports.addParticipant = async (req, res, next) => {
   try {
     team = await Team.findById(teamId);
   } catch (e) {
-    return next(new HttpError(" adding hackaton fail  ! ", 500));
+    return next(
+      new HttpError(
+        " You Are not a member in any team Please create one ! ",
+        500
+      )
+    );
   }
   if (!team) {
     return next(new HttpError(" we could not find this team ! ", 404));
+  }
+
+  if (hackaton.participants.includes(teamId)) {
+    return next(
+      new HttpError("Your team is already a participant in this hackaton!", 422)
+    );
   }
 
   try {
@@ -270,7 +281,12 @@ exports.editHackaton = async (req, res, next) => {
     return next(new HttpError("Updating hackaton failed", 500));
   }
 
-  res.status(200).json({ hackaton: hackaton.toObject({ getters: true }) });
+  res
+    .status(200)
+    .json({
+      msg: "Hackaton Updated correctly !",
+      hackaton: hackaton.toObject({ getters: true }),
+    });
 };
 
 exports.deleteHackaton = async (req, res, next) => {
@@ -281,11 +297,15 @@ exports.deleteHackaton = async (req, res, next) => {
     hackaton = await Hackaton.findById(hackatonId);
   } catch (e) {
     console.error("Error finding hackaton:", e);
-    return next(new HttpError("Something went wrong, could not delete hackaton", 500));
+    return next(
+      new HttpError("Something went wrong, could not delete hackaton", 500)
+    );
   }
 
   if (!hackaton) {
-    return next(new HttpError("Could not find hackaton for the provided id", 404));
+    return next(
+      new HttpError("Could not find hackaton for the provided id", 404)
+    );
   }
 
   let teams;
@@ -293,13 +313,15 @@ exports.deleteHackaton = async (req, res, next) => {
     teams = await Team.find({ joined_hackathon: hackatonId });
   } catch (e) {
     console.error("Error finding teams:", e);
-    return next(new HttpError("Something went wrong, could not find teams", 500));
+    return next(
+      new HttpError("Something went wrong, could not find teams", 500)
+    );
   }
 
   try {
     const SESSION = await mongoose.startSession();
     SESSION.startTransaction();
-    
+
     const teamUpdates = teams.map(async (team) => {
       team.joined_hackathon.pull(hackatonId);
       return team.save({ session: SESSION });
@@ -312,10 +334,8 @@ exports.deleteHackaton = async (req, res, next) => {
     await SESSION.commitTransaction();
 
     res.status(200).json({ message: "Hackaton deleted successfully" });
-
   } catch (e) {
     console.error("Error deleting hackaton:", e);
     return next(new HttpError("Deleting hackaton failed", 500));
   }
 };
-

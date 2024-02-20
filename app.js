@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cloudinary = require('cloudinary').v2;
+const cors = require('cors');
 
 const HttpError = require("./models/http-error");
 
@@ -11,6 +12,8 @@ const hackaton = require("./routes/hackaton");
 const upload = require('./upload');
 
 const app = express();
+
+app.use(cors());
 
 app.use(bodyParser.json());
 
@@ -24,6 +27,7 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Methods",
     "GET, POST, PATCH, DELETE"
   );
+  // res.setHeader("Content-Type", "multipart/form-data");
   next();
 });
 
@@ -52,6 +56,9 @@ cloudinary.config({
   api_secret: '0UgeZPnsrmRfbWu-u8eZxo-W0uk',
 });
 
+
+
+
 // const CLOUDINARY_URL="CLOUDINARY_URL=cloudinary://513133278582537:0UgeZPnsrmRfbWu-u8eZxo-W0uk@duvougrqx";
 // cloudinary.config(process.env.CLOUDINARY_URL);
 
@@ -61,7 +68,7 @@ mongoose
     "mongodb+srv://dissojak:stoondissojakb2a@stoon.r8tcyqv.mongodb.net/hackaton?retryWrites=true&w=majority"
   )
   .then(() => {
-    app.listen(5000);
+    app.listen(8000);
   })
   .catch((err) => {
     console.log("MongoDB connection error:",err);
