@@ -61,6 +61,7 @@ exports.addMember = async (req, res, next) => {
   const teamId = req.params.tid;
   let user;
   try {
+    // const ANalytics = Analytrics with id of artist that we need
     user = await User.findOne({ email });
   } catch (e) {
     return next(new HttpError(" adding member failed ! ", 500));
@@ -76,6 +77,7 @@ exports.addMember = async (req, res, next) => {
   }
   let team;
   try {
+    // get the new Review
     team = await Team.findById(teamId);
   } catch (e) {
     return next(new HttpError(" adding member ! ", 500));
@@ -97,6 +99,21 @@ exports.addMember = async (req, res, next) => {
     return next(new HttpError(" adding the member to team failed !!! ", 500));
   }
   res.status(201).json({ team: team.toObject({ getters: true }) });
+
+  // try {
+  //   const SESSION = await mongoose.startSession();
+  //   SESSION.startTransaction();
+  // Rating
+  // Likes
+  // Views
+  //   create new review
+  //   await review.save({ SESSION });
+  //   analytics.ratings = analytics.ratings + Ratings;
+  //   analytics.likes = analytics.likes + Likes;
+  //   analytics.views = analytics.views + Views;
+  //   await analytics.save({ SESSION });
+  //   await SESSION.commitTransaction();
+  // }
 };
 
 exports.deleteMember = async (req, res, next) => {
@@ -153,7 +170,11 @@ exports.deleteMember = async (req, res, next) => {
       new HttpError(" deleting the member from the team failed !!! ", 500)
     );
   }
-  res.status(200).json({ message: "Member deleted successfully" , team: team.toObject({ getters: true }) , user: user.toObject({ getters: true })});
+  res.status(200).json({
+    message: "Member deleted successfully",
+    team: team.toObject({ getters: true }),
+    user: user.toObject({ getters: true }),
+  });
 };
 exports.deleteTeam = async (req, res, next) => {
   const errors = validationResult(req);
@@ -272,10 +293,8 @@ exports.banTeam = async (req, res, next) => {
     return next(new HttpError("Banning team failed", 500));
   }
 
-  res
-    .status(200)
-    .json({
-      message: "Team and its members got banned successfully",
-      banned: true,
-    });
+  res.status(200).json({
+    message: "Team and its members got banned successfully",
+    banned: true,
+  });
 };
