@@ -138,12 +138,17 @@ exports.changeEmail = async (req, res, next) => {
   const { email } = req.body;
   const userId = req.params.uid;
   let user;
-  
+
   let existingUser;
   try {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
-    return next(new HttpError("Something went wrong while checking email availability", 500));
+    return next(
+      new HttpError(
+        "Something went wrong while checking email availability",
+        500
+      )
+    );
   }
 
   if (existingUser && existingUser.id !== userId) {
@@ -216,7 +221,7 @@ exports.getTeamJoinedByUserId = async (req, res, next) => {
   }
 };
 
-(exports.update_ProfileImage = async (req, res) => {
+exports.update_ProfileImage = async (req, res) => {
   try {
     const userId = req.params.uid; // Assuming you have user authentication
     const { imageUrl } = req.body; // Assuming you send the image URL in the request body
@@ -237,13 +242,14 @@ exports.getTeamJoinedByUserId = async (req, res, next) => {
     console.error("Error updating profile image:", error);
     res.status(500).json({ error: "Failed to update profile image" });
   }
-}),
-  //admin function
-  (exports.updateAllUsersToAdmin = async (req, res, next) => {
-    try {
-      await User.updateMany({}, { isAdmin: false });
-      res.json("all users updated to admin.");
-    } catch (error) {
-      return next(new HttpError("Error updating users to admin", 500));
-    }
-  });
+};
+
+//admin function
+exports.updateAllUsersToAdmin = async (req, res, next) => {
+  try {
+    await User.updateMany({}, { isAdmin: false });
+    res.json("all users updated to admin.");
+  } catch (error) {
+    return next(new HttpError("Error updating users to admin", 500));
+  }
+};
